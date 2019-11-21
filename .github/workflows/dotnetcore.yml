@@ -18,6 +18,6 @@ jobs:
     - name: Package
       run: dotnet pack --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
     - name: Publish
-      run: dotnet nuget push src/OperatorSharp/artifacts/*.nupkg -k ${NUGET_TOKEN}  
+      run: dotnet nuget push src/OperatorSharp/artifacts/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
         NUGET_TOKEN: ${{ secrets.NuGetKey }}
