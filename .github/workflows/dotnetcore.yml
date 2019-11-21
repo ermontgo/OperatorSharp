@@ -14,4 +14,10 @@ jobs:
       with:
         dotnet-version: 2.2.108
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S)
+    - name: Package
+      run: dotnet pack --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
+    - name: Publish
+      run: run: dotnet nuget push ./artifacts/*.nupkg -k ${NUGET_TOKEN}  
+      env:
+        NUGET_TOKEN: ${{ secrets.NuGetKey }}
