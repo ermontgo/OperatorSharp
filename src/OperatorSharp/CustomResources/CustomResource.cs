@@ -12,9 +12,14 @@ namespace OperatorSharp.CustomResources
         public V1ObjectMeta Metadata { get; set; }
     }
 
-    public abstract class CustomResource<TSpec, TStatus> : CustomResource {
+    public abstract class CustomResource<TSpec> : CustomResource
+    {
         [JsonProperty(PropertyName = "spec")]
         public TSpec Spec { get; set; }
+    }
+
+    public abstract class CustomResource<TSpec, TStatus> : CustomResource<TSpec>, IStatusEnabledCustomResource
+    {
         [JsonProperty(PropertyName = "status")]
         public TStatus Status { get; set; }
     }
