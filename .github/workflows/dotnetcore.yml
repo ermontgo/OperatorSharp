@@ -18,9 +18,9 @@ jobs:
     - name: Package OperatorSharp
       run: dotnet pack --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
     - name: Build OperatorSharp.Tools.DotNet with dotnet
-      run: dotnet build --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S)
+      run: dotnet build --configuration Release src/OperatorSharp.Tools.DotNet/OperatorSharp.Tools.DotNet.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S)
     - name: Package OperatorSharp.Tools.DotNet
-      run: dotnet pack --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
+      run: dotnet pack --configuration Release src/OperatorSharp.Tools.DotNet/OperatorSharp.Tools.DotNet.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
     - name: Publish
       run: dotnet nuget push src/OperatorSharp/artifacts/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
