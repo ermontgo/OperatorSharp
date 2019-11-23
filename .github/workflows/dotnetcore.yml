@@ -13,9 +13,13 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
-    - name: Build with dotnet
+    - name: Build OperatorSharp with dotnet
       run: dotnet build --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S)
-    - name: Package
+    - name: Package OperatorSharp
+      run: dotnet pack --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
+    - name: Build OperatorSharp.Tools.DotNet with dotnet
+      run: dotnet build --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S)
+    - name: Package OperatorSharp.Tools.DotNet
       run: dotnet pack --configuration Release src/OperatorSharp/OperatorSharp.csproj --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o artifacts/
     - name: Publish
       run: dotnet nuget push src/OperatorSharp/artifacts/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
