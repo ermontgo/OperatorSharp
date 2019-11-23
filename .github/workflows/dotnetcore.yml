@@ -17,7 +17,12 @@ jobs:
       run: dotnet build --configuration Release src/OperatorSharp.sln --version-suffix prerelease-$(date +%Y%m%d%H%M%S)
     - name: Package OperatorSharp
       run: dotnet pack --configuration Release src/OperatorSharp.sln --version-suffix prerelease-$(date +%Y%m%d%H%M%S) -o ../artifacts/
-    - name: Publish OperatorSharp.Tools.DotNet
-      run: dotnet nuget push src/artifacts/*.nupkg -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
+    - name: Publish All
+      run: |
+           for f in src/artifacts/*.nupkg
+           do
+             dotnet nuget push $f -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
+           done
+      shell: bash
       env:
         NUGET_TOKEN: ${{ secrets.NuGetKey }}
