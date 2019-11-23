@@ -3,7 +3,29 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>dotnet-operator-sharp</AssemblyName>
+    <PackageType>DotNetCliTool</PackageType>
+    <PackageId>OperatorSharp.Tools.DotNet</PackageId>
+    <Authors>Eric Montgomery</Authors>
+    <Company>Eric Montgomery</Company>
+    <Product>OperatorSharp</Product>
+    <PackageLicenseFile>README.md</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/ermontgo/OperatorSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ermontgo/OperatorSharp</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="operatorsharp.g.targets" />
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="operatorsharp.g.targets" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.4.4" />

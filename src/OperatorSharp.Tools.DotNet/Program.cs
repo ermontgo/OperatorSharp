@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OperatorSharp.Tools.DotNet
 {
-    [Command("dotnet-operatorsharp"), Subcommand(typeof(GenerateCrdsCommand))]
+    [Command("dotnet-operatorsharp"), Subcommand(typeof(GenerateCrdsCommand), typeof(BuildCrdsCommand))]
     class Program
     {
         static void Main(string[] args) => CommandLineApplication.ExecuteAsync<Program>(args);
