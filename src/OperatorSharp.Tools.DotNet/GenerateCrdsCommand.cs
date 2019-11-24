@@ -19,9 +19,9 @@ namespace OperatorSharp.Tools.DotNet
         public string OutputFolder { get; set; }
 
         // Unsure how the CommandLineUtils API works and if it requires OnExecute to be private, so adding a public shim for unit testing
-        public async Task<int> ExecuteAsync(IConsole console) => await OnExecuteAsync(console);
+        public int Execute(IConsole console) => OnExecute(console);
 
-        private async Task<int> OnExecuteAsync(IConsole console)
+        private int OnExecute(IConsole console)
         {
             console.WriteLine("Generating CRDs");
             if (!File.Exists(AssemblyPath)) { throw new FileNotFoundException("Could not find the provided assembly", AssemblyPath); }
@@ -45,7 +45,7 @@ namespace OperatorSharp.Tools.DotNet
                     var crdPath = Path.Combine(directory.FullName, $"{crd.Metadata.Name}.yaml");
 
                     console.WriteLine($"Writing CRD yaml to {crdPath}");
-                    await File.WriteAllTextAsync(crdPath, crdYaml);
+                    File.WriteAllText(crdPath, crdYaml);
                 }
                 catch (MissingMetadataAttributeException mmaEx)
                 {

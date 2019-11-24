@@ -8,9 +8,9 @@ namespace OperatorSharp.Tools.DotNet
     [Command("dotnet-operatorsharp"), Subcommand(typeof(GenerateCrdsCommand), typeof(BuildCrdsCommand))]
     class Program
     {
-        static void Main(string[] args) => CommandLineApplication.ExecuteAsync<Program>(args);
+        static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
 
-        private async Task<int> OnExecuteAsync(CommandLineApplication app, IConsole console)
+        private int OnExecute(CommandLineApplication app, IConsole console)
         {
             console.WriteLine("You must specify at a subcommand.");
             app.ShowHelp();

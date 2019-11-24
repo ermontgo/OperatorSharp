@@ -18,7 +18,7 @@ namespace OperatorSharp.Tools.DotNet
         [Option("-p|--project")]
         public string ProjectFile { get; set; }
 
-        private async Task<int> OnExecuteAsync(IConsole console)
+        private int OnExecute(IConsole console)
         {
             try
             {
@@ -28,7 +28,7 @@ namespace OperatorSharp.Tools.DotNet
                     ProjectFile = FindProjectFile();
                 }
 
-                await WriteTargets(ProjectFile);
+                WriteTargets(ProjectFile);
 
                 StartBuildProcess(ProjectFile);
 
@@ -52,14 +52,14 @@ namespace OperatorSharp.Tools.DotNet
             process.WaitForExit();
         }
 
-        private async Task WriteTargets(string projectFile)
+        private void WriteTargets(string projectFile)
         {
-            string targetsContent = await LoadFileFromEmbeddedResource(targetsMoniker);
+            string targetsContent = LoadFileFromEmbeddedResource(targetsMoniker);
             var targetFileName = Path.GetFileName(projectFile) + "." + targetsMoniker;
             var projectExtPath = Path.Combine(Path.GetDirectoryName(projectFile), "obj");
             var targetFile = Path.Combine(projectExtPath, targetFileName);
 
-            await File.WriteAllTextAsync(targetFile, targetsContent);
+            File.WriteAllText(targetFile, targetsContent);
         }
 
         private string FindProjectFile()
@@ -73,14 +73,14 @@ namespace OperatorSharp.Tools.DotNet
             return projectFiles.First();
         }
 
-        private async Task<string> LoadFileFromEmbeddedResource(string resourcePath)
+        private string LoadFileFromEmbeddedResource(string resourcePath)
         {
             var assembly = Assembly.GetExecutingAssembly();
 
             using (Stream stream = assembly.GetManifestResourceStream($"OperatorSharp.Tools.DotNet.{resourcePath}"))
             using (StreamReader rdr = new StreamReader(stream))
             {
-                return await rdr.ReadToEndAsync();
+                return rdr.ReadToEnd();
             }
         }
     }
