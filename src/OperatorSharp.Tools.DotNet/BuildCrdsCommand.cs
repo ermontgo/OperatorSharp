@@ -18,6 +18,9 @@ namespace OperatorSharp.Tools.DotNet
         [Option("-p|--project")]
         public string ProjectFile { get; set; }
 
+        [Option("-o|--output")]
+        public string OutputPath { get; set; }
+
         private int OnExecute(IConsole console)
         {
             try
@@ -48,6 +51,12 @@ namespace OperatorSharp.Tools.DotNet
                 FileName = "dotnet",
                 Arguments = $"msbuild \"{projectFile}\" /t:_OperatorSharpGenerateCRDs /nologo"
             };
+
+            if (!string.IsNullOrEmpty(OutputPath))
+            {
+                psi.Arguments += $" /p:CrdOutputPath=\"{OutputPath}\"";
+            }
+
             var process = Process.Start(psi);
             process.WaitForExit();
         }

@@ -1,5 +1,8 @@
 ﻿<Project>
+  <PropertyGroup>
+    <CrdOutputPath Condition="'$(OutputPath)'==''">$(OutputPath)crds</CrdOutputPath>
+  </PropertyGroup>
     <Target Name="_OperatorSharpGenerateCRDs" DependsOnTargets="Build">
-        <Exec Command="dotnet operator-sharp generate-crds -a $(OutputPath)$(AssemblyName).dll -o $(OutputPath)crds" />
+        <Exec Command="dotnet operator-sharp generate-crds -a $(OutputPath)$(AssemblyName).dll -o $(CrdOutputPath)" />
     </Target>
 </Project>
