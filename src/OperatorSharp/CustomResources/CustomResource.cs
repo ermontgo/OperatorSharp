@@ -12,7 +12,7 @@ namespace OperatorSharp.CustomResources
         [JsonProperty(PropertyName = "metadata")]
         public V1ObjectMeta Metadata { get; set; }
 
-        public ApiVersion ApiVersion => GetAttribute<ApiVersionAttribute>().ApiVersion;
+        public ApiVersion ApiVersionMetadata => GetAttribute<ApiVersionAttribute>().ApiVersion;
         public string PluralName => GetAttribute<PluralNameAttribute>().PluralName;
 
         public TAttribute GetAttribute<TAttribute>() where TAttribute : Attribute
