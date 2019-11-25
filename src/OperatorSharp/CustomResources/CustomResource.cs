@@ -2,6 +2,7 @@
 using k8s;
 using k8s.Models;
 using Newtonsoft.Json;
+using OperatorSharp.CustomResources.Metadata;
 
 namespace OperatorSharp.CustomResources
 {
@@ -10,6 +11,16 @@ namespace OperatorSharp.CustomResources
     {
         [JsonProperty(PropertyName = "metadata")]
         public V1ObjectMeta Metadata { get; set; }
+
+        public ApiVersion ApiVersion => GetAttribute<ApiVersionAttribute>().ApiVersion;
+        public string PluralName => GetAttribute<PluralNameAttribute>().PluralName;
+
+        public TAttribute GetAttribute<TAttribute>() where TAttribute : Attribute
+        {
+            TAttribute attribute = Attribute.GetCustomAttribute(GetType(), typeof(TAttribute)) as TAttribute;
+
+            return attribute;
+        }
     }
 
     public abstract class CustomResource<TSpec> : CustomResource
