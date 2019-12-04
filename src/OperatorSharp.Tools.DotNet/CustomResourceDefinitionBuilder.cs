@@ -23,7 +23,9 @@ namespace OperatorSharp.Tools.DotNet
                 var shortNames = new List<string> { GetAttribute<ShortNameAttribute>(resourceType).ShortName };
 
                 var crd = new V1CustomResourceDefinition
-                {
+                { 
+                    ApiVersion = "apiextensions.k8s.io/v1beta1",
+                    Kind = "CustomResourceDefinition",
                     Metadata = new V1ObjectMeta
                     {
                         Name = $"{plural}.{apiVersion.Group}"
