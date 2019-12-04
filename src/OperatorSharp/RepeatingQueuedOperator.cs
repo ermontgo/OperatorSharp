@@ -13,7 +13,8 @@ namespace OperatorSharp
     public abstract class RepeatingQueuedOperator<TCustomResource> : Operator<TCustomResource>, IDisposable where TCustomResource : CustomResource
     {
         private ConcurrentQueue<CustomResourceExecutionContext<TCustomResource>> executionQueue { get; set; } = new ConcurrentQueue<CustomResourceExecutionContext<TCustomResource>>();
-        private ConcurrentBag<CustomResourceExecutionContext<TCustomResource>> retryItems { get; set; } = new ConcurrentBag<CustomResourceExecutionContext<TCustomResource>>();
+        private ConcurrentDictionary<CustomResourceExecutionContext<TCustomResource>, CustomResourceExecutionContext<TCustomResource>> retryItems { get; set; } 
+            = new ConcurrentDictionary<CustomResourceExecutionContext<TCustomResource>, CustomResourceExecutionContext<TCustomResource>>();
 
         private Timer timer;
         private readonly int? executionLimit;
@@ -33,19 +34,25 @@ namespace OperatorSharp
         protected void HandleTimer(object state)
         {
             var now = DateTimeOffset.Now;
-            var newEvents = retryItems.Where(k => k.NextExecutionTime <= now);
+            var newEvents = retryItems.Where(k => k.Value.NextExecutionTime <= now).Select(k => k.Value).ToList();
             foreach (var ev in newEvents)
             {
-                executionQueue.Enqueue(ev);
+                if (retryItems.TryRemove(ev, out _))
+                {
+                    Logger.LogDebug("Queueing {kind} {item} from retry list", ev.Item.Kind, ev.Item.Metadata.Name);
+                    executionQueue.Enqueue(ev);
+                }
             }
 
             if (executionQueue.TryDequeue(out var context))
             {
                 try
                 {
+                    Logger.LogDebug("Dequeueing {kind} {name} for execution", context.Item.Kind, context.Item.Metadata.Name);
                     var result = HandleDequeuedItem(context.EventType, context.Item, context.PreviousExecutionsCount);
                     if (!result)
                     {
+                        Logger.LogDebug("Execution of {kind} {name} failed", context.Item.Kind, context.Item.Metadata.Name);
                         RequeueContext(context);
                     }
                 }
@@ -67,7 +74,8 @@ namespace OperatorSharp
                 var backoffSeconds = Math.Pow(2, backoffFactor);
                 context.NextExecutionTime = DateTimeOffset.Now.AddSeconds(backoffSeconds);
 
-                retryItems.Add(context);
+                Logger.LogDebug("Requeuing {kind} {name} to execute after {time} ({backoffSeconds})", context.Item.Kind, context.Item.Metadata.Name, context.NextExecutionTime, backoffSeconds);
+                retryItems.TryAdd(context, context);
             }
         }
 
