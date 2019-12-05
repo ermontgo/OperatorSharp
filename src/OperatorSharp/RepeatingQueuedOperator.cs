@@ -33,6 +33,10 @@ namespace OperatorSharp
 
         protected void HandleTimer(object state)
         {
+            Logger.LogDebug("STATS:");
+            Logger.LogDebug("Retry Queue Depth: {retryDepth}", retryItems.Count);
+            Logger.LogDebug("Execution Queue Depth: {executionDepth}", executionQueue.Count);
+
             var now = DateTimeOffset.Now;
             var newEvents = retryItems.Where(k => k.Value.NextExecutionTime <= now).Select(k => k.Value).ToList();
             foreach (var ev in newEvents)
