@@ -48,7 +48,7 @@ namespace OperatorSharp
             {
                 try
                 {
-                    Logger.LogDebug("Dequeueing {kind} {name} for execution", context.Item.Kind, context.Item.Metadata.Name);
+                    Logger.LogDebug("Dequeueing {kind} {name} for execution ({n}th execution since {enqueueDate})", context.Item.Kind, context.Item.Metadata.Name, context.PreviousExecutionsCount);
                     var result = HandleDequeuedItem(context.EventType, context.Item, context.PreviousExecutionsCount);
                     if (!result)
                     {
@@ -93,6 +93,7 @@ namespace OperatorSharp
         public WatchEventType EventType { get; set; }
         public int PreviousExecutionsCount { get; set; }
 
+        public DateTimeOffset EnqueuedDate { get; set; } = DateTimeOffset.Now;
         public DateTimeOffset? NextExecutionTime { get; set; }
     }
 }
