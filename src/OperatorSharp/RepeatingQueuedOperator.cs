@@ -25,15 +25,13 @@ namespace OperatorSharp
         {
             timer = new Timer(HandleTimer, null, delayMilliseconds, periodMilliseconds);
             this.executionLimit = executionLimit;
-
-            Metrics = AppMetrics.CreateDefaultBuilder().Build();
         }
 
         public override void HandleItem(WatchEventType eventType, TCustomResource item)
         {
             var executionContext = new CustomResourceExecutionContext<TCustomResource>() { Item = item, EventType = eventType, PreviousExecutionsCount = 0 };
             executionQueue.Enqueue(executionContext);
-            Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
+            Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
         }
 
         protected IMetrics Metrics { get; set; }
@@ -46,10 +44,10 @@ namespace OperatorSharp
             {
                 if (retryItems.TryRemove(ev, out _))
                 {
-                    Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, retryItems.Count);
+                    Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, retryItems.Count);
                     Logger.LogDebug("Queueing {kind} {item} from retry list", ev.Item.Kind, ev.Item.Metadata.Name);
                     executionQueue.Enqueue(ev);
-                    Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
+                    Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
                 }
             }
 
@@ -85,7 +83,7 @@ namespace OperatorSharp
 
                 Logger.LogDebug("Requeuing {kind} {name} to execute after {time} ({backoffSeconds})", context.Item.Kind, context.Item.Metadata.Name, context.NextExecutionTime, backoffSeconds);
                 retryItems.TryAdd(context, context);
-                Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, retryItems.Count);
+                Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, retryItems.Count);
             }
         }
 
