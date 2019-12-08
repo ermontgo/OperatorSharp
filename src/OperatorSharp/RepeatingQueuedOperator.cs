@@ -1,4 +1,6 @@
-﻿using k8s;
+﻿using App.Metrics;
+using App.Metrics.Gauge;
+using k8s;
 using Microsoft.Extensions.Logging;
 using OperatorSharp.CustomResources;
 using System;
@@ -23,28 +25,31 @@ namespace OperatorSharp
         {
             timer = new Timer(HandleTimer, null, delayMilliseconds, periodMilliseconds);
             this.executionLimit = executionLimit;
+
+            Metrics = AppMetrics.CreateDefaultBuilder().Build();
         }
 
         public override void HandleItem(WatchEventType eventType, TCustomResource item)
         {
             var executionContext = new CustomResourceExecutionContext<TCustomResource>() { Item = item, EventType = eventType, PreviousExecutionsCount = 0 };
             executionQueue.Enqueue(executionContext);
+            Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
         }
+
+        protected IMetrics Metrics { get; set; }
 
         protected void HandleTimer(object state)
         {
-            Logger.LogDebug("STATS:");
-            Logger.LogDebug("Retry Queue Depth: {retryDepth}", retryItems.Count);
-            Logger.LogDebug("Execution Queue Depth: {executionDepth}", executionQueue.Count);
-
             var now = DateTimeOffset.Now;
             var newEvents = retryItems.Where(k => k.Value.NextExecutionTime <= now).Select(k => k.Value).ToList();
             foreach (var ev in newEvents)
             {
                 if (retryItems.TryRemove(ev, out _))
                 {
+                    Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, retryItems.Count);
                     Logger.LogDebug("Queueing {kind} {item} from retry list", ev.Item.Kind, ev.Item.Metadata.Name);
                     executionQueue.Enqueue(ev);
+                    Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
                 }
             }
 
@@ -80,6 +85,7 @@ namespace OperatorSharp
 
                 Logger.LogDebug("Requeuing {kind} {name} to execute after {time} ({backoffSeconds})", context.Item.Kind, context.Item.Metadata.Name, context.NextExecutionTime, backoffSeconds);
                 retryItems.TryAdd(context, context);
+                Metrics.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, retryItems.Count);
             }
         }
 
@@ -99,5 +105,11 @@ namespace OperatorSharp
 
         public DateTimeOffset EnqueuedDate { get; set; } = DateTimeOffset.Now;
         public DateTimeOffset? NextExecutionTime { get; set; }
+    }
+
+    public static class RepeatingQueuedOperatorMetrics
+    {
+        public static GaugeOptions ExecutionQueueDepth = new GaugeOptions() { Name = "Execution Queue Depth", MeasurementUnit = Unit.Items };
+        public static GaugeOptions RetryItemDepth = new GaugeOptions() { Name = "Retry Items Depth", MeasurementUnit = Unit.Items };
     }
 }
