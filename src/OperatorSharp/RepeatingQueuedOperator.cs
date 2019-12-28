@@ -66,6 +66,7 @@ namespace OperatorSharp
                 catch (Exception ex)
                 {
                     Logger.LogError("An error occurred while processing the message. The message will be requeued", ex);
+                    Logger.LogDebug(ex, "Exception Details");
 
                     RequeueContext(context);
                 }
