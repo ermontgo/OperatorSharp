@@ -55,7 +55,7 @@ namespace OperatorSharp
             {
                 try
                 {
-                    Logger.LogDebug("Dequeueing {kind} {name} for execution ({n}th execution since {enqueueDate})", context.Item.Kind, context.Item.Metadata.Name, context.PreviousExecutionsCount);
+                    Logger.LogDebug("Dequeueing {kind} {name} for execution ({n}th execution since {enqueueDate})", context.Item.Kind, context.Item.Metadata.Name, context.PreviousExecutionsCount, context.EnqueuedDate);
                     var result = HandleDequeuedItem(context.EventType, context.Item, context.PreviousExecutionsCount);
                     if (!result)
                     {
