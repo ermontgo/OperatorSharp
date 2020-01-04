@@ -55,6 +55,8 @@ namespace OperatorSharp
 
             if (executionQueue.TryDequeue(out var context))
             {
+                Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
+
                 try
                 {
                     Logger.LogDebug("Dequeueing {kind} {name} for execution ({n}th execution since {enqueueDate})", context.Item.Kind, context.Item.Metadata.Name, context.PreviousExecutionsCount, context.EnqueuedDate);
@@ -113,5 +115,6 @@ namespace OperatorSharp
         public static GaugeOptions ExecutionQueueDepth = new GaugeOptions() { Name = "Execution Queue Depth", MeasurementUnit = Unit.Items };
         public static GaugeOptions RetryItemDepth = new GaugeOptions() { Name = "Retry Items Depth", MeasurementUnit = Unit.Items };
         public static CounterOptions MessagesProcessed = new CounterOptions() { Name = "Messages Processed", MeasurementUnit = Unit.Items };
+        public static CounterOptions MessagesEvicted = new CounterOptions() { Name = "Messages Evicted", MeasurementUnit = Unit.Items };
     }
 }
