@@ -1,4 +1,5 @@
 ﻿using App.Metrics;
+using App.Metrics.Counter;
 using App.Metrics.Gauge;
 using k8s;
 using Microsoft.Extensions.Logging;
@@ -32,6 +33,7 @@ namespace OperatorSharp
             var executionContext = new CustomResourceExecutionContext<TCustomResource>() { Item = item, EventType = eventType, PreviousExecutionsCount = 0 };
             executionQueue.Enqueue(executionContext);
             Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, executionQueue.Count);
+            Metrics?.Measure.Counter.Increment(RepeatingQueuedOperatorMetrics.MessagesProcessed);
         }
 
         protected IMetrics Metrics { get; set; }
@@ -110,5 +112,6 @@ namespace OperatorSharp
     {
         public static GaugeOptions ExecutionQueueDepth = new GaugeOptions() { Name = "Execution Queue Depth", MeasurementUnit = Unit.Items };
         public static GaugeOptions RetryItemDepth = new GaugeOptions() { Name = "Retry Items Depth", MeasurementUnit = Unit.Items };
+        public static CounterOptions MessagesProcessed = new CounterOptions() { Name = "Messages Processed", MeasurementUnit = Unit.Items };
     }
 }
