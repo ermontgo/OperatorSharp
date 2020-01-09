@@ -6,6 +6,8 @@ using System.Reactive.Subjects;
 using k8s;
 using OperatorSharp.CustomResources.Metadata;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using OperatorSharp.Filters;
 
 namespace OperatorSharp
 {
@@ -27,11 +29,29 @@ namespace OperatorSharp
         protected IKubernetes Client { get; private set; }
         public ILogger<Operator<TCustomResource>> Logger { get; }
 
+        public readonly List<IOperatorFilter<TCustomResource>> Filters = new List<IOperatorFilter<TCustomResource>>();
+
         public static ApiVersion ApiVersion => GetAttribute<TCustomResource, ApiVersionAttribute>().ApiVersion;
         public static string PluralName => GetAttribute<TCustomResource, PluralNameAttribute>().PluralName;
 
         public abstract void HandleItem(WatchEventType eventType, TCustomResource item);
 
+        public void OnHandleItem(WatchEventType eventType, TCustomResource item)
+        {
+            foreach (var filter in Filters)
+            {
+                bool continuePipeline = filter.Execute(eventType, item);
+
+                if (!continuePipeline)
+                {
+                    Logger.LogWarning("Message {type}:{name} ({version}) stopped processing due to results of {filter} filter", item.Kind, item.Metadata.Name, item.Metadata.ResourceVersion, filter.GetType().Name);
+                    break;
+                }
+
+                HandleItem(eventType, item);
+            }
+        }
+        
         public abstract void HandleException(Exception ex);
 
         public override Task WatchAsync(CancellationToken token, string watchedNamespace)
@@ -47,7 +67,7 @@ namespace OperatorSharp
                 );
 
                 Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
-                result.Watch<TCustomResource, object>((type, item) => HandleItem(type, item), (ex) => HandleException(ex));
+                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex));
 
                 return result;
             }
