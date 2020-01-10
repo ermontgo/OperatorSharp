@@ -8,6 +8,6 @@ namespace OperatorSharp.CustomResources
     public class CustomResourceStatus
     {
         [JsonProperty("observedGeneration")]
-        public int ObservedGeneration { get; set; }
+        public long? ObservedGeneration { get; set; }
     }
 }
