@@ -30,7 +30,7 @@ namespace OperatorSharp.CustomResources
     }
 
     public abstract class CustomResource<TSpec, TStatus> : CustomResource<TSpec>, IStatusEnabledCustomResource, IStatusEnabledCustomResource<TStatus>
-        where TStatus: IStatus
+        where TStatus: CustomResourceStatus
     {
         [JsonProperty(PropertyName = "status")]
         public TStatus Status { get; set; }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OperatorSharp.CustomResources
 {
-    public interface IStatus
+    public class CustomResourceStatus
     {
         [JsonProperty("observedGeneration")]
         public int ObservedGeneration { get; set; }

@@ -7,7 +7,7 @@ namespace OperatorSharp.Filters
 {
     public class IgnoreStatusUpdatesOperatorFilter<TCustomResource, TStatus> : IgnoreMessageOperatorFilter<TCustomResource>
         where TCustomResource : CustomResource, IStatusEnabledCustomResource<TStatus>
-        where TStatus: IStatus
+        where TStatus: CustomResourceStatus
     {
         private static Predicate<TCustomResource> IgnoreStatusUpdatesPredicate = message =>
         {

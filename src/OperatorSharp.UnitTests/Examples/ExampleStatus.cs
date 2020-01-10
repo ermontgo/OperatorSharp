@@ -2,8 +2,7 @@
 
 namespace OperatorSharp.UnitTests.Examples
 {
-    internal class ExampleStatus : IStatus
+    internal class ExampleStatus : CustomResourceStatus
     {
-        public int ObservedGeneration { get; set; }
     }
 }
