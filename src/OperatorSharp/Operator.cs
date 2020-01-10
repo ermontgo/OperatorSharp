@@ -29,7 +29,7 @@ namespace OperatorSharp
         protected IKubernetes Client { get; private set; }
         public ILogger<Operator<TCustomResource>> Logger { get; }
 
-        public readonly List<IOperatorFilter<TCustomResource>> Filters = new List<IOperatorFilter<TCustomResource>>();
+        protected readonly List<IOperatorFilter<TCustomResource>> Filters = new List<IOperatorFilter<TCustomResource>>();
 
         public static ApiVersion ApiVersion => GetAttribute<TCustomResource, ApiVersionAttribute>().ApiVersion;
         public static string PluralName => GetAttribute<TCustomResource, PluralNameAttribute>().PluralName;
@@ -38,18 +38,19 @@ namespace OperatorSharp
 
         public void OnHandleItem(WatchEventType eventType, TCustomResource item)
         {
+            bool continuePipeline = true;
             foreach (var filter in Filters)
             {
-                bool continuePipeline = filter.Execute(eventType, item);
+                continuePipeline &= filter.Execute(eventType, item);
 
                 if (!continuePipeline)
                 {
                     Logger.LogWarning("Message {type}:{name} ({version}) stopped processing due to results of {filter} filter", item.Kind, item.Metadata.Name, item.Metadata.ResourceVersion, filter.GetType().Name);
                     break;
                 }
-
-                HandleItem(eventType, item);
             }
+
+            if (continuePipeline) HandleItem(eventType, item);
         }
         
         public abstract void HandleException(Exception ex);
