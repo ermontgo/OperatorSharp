@@ -1,12 +1,11 @@
 ﻿using k8s;
 using Microsoft.Extensions.Logging;
 using OperatorSharp.Filters;
-using OperatorSharp.UnitTests.Examples;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OperatorSharp.UnitTests
+namespace OperatorSharp.UnitTests.Examples
 {
     internal class ExampleOperator : Operator<ExampleResource>
     {

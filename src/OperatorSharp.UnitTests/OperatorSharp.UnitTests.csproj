@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OperatorSharp.Tools.DotNet\OperatorSharp.Tools.DotNet.csproj" />
     <ProjectReference Include="..\OperatorSharp\OperatorSharp.csproj" />
   </ItemGroup>
 
