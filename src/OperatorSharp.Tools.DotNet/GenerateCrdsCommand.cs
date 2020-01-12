@@ -18,6 +18,16 @@ namespace OperatorSharp.Tools.DotNet
         [Option("-o|--output", CommandOptionType.SingleValue)]
         public string OutputFolder { get; set; }
 
+        [Option("-k|--kubernetes-version", CommandOptionType.SingleValue, Description = "The version of the Kubernetes CRD API to target. This must be either \"v1\" or \"v1beta1\".")]
+        public string Version { get; set; }
+
+        protected Dictionary<string, ICustomResourceDefinitionBuilder> builders = new Dictionary<string, ICustomResourceDefinitionBuilder>()
+        {
+            { "v1beta1", new V1beta1CustomResourceDefinitionBuilder() },
+            { "v1", new V1CustomResourceDefinitionBuilder() },
+            { "", new V1beta1CustomResourceDefinitionBuilder() }
+        };
+
         // Unsure how the CommandLineUtils API works and if it requires OnExecute to be private, so adding a public shim for unit testing
         public int Execute(IConsole console) => OnExecute(console);
 
@@ -27,12 +37,18 @@ namespace OperatorSharp.Tools.DotNet
             if (!File.Exists(AssemblyPath)) { throw new FileNotFoundException("Could not find the provided assembly", AssemblyPath); }
             var directory = Directory.CreateDirectory(OutputFolder);
 
+            var version = (Version ?? string.Empty).ToLower().Trim();
+            if (!builders.ContainsKey(version))
+            {
+                throw new ArgumentOutOfRangeException("kubernetes-version", "The kubernetes version specified is not available. Please choose \"v1\" or \"v1beta1\".");
+            }
+
             var assembly = Assembly.LoadFrom(AssemblyPath);
 
             console.WriteLine($"Located assembly {assembly.FullName}");
 
             var searcher = new CustomResourceSearcher();
-            var builder = new CustomResourceDefinitionBuilder();
+            var builder = builders[version];
             var customResourceTypes = searcher.FindCustomResourceTypes(assembly);
 
             foreach (var customResourceType in customResourceTypes)
@@ -41,8 +57,8 @@ namespace OperatorSharp.Tools.DotNet
                 {
                     console.WriteLine($"Generating CRD for {customResourceType.Name}");
                     var crd = builder.BuildDefinition(customResourceType);
-                    var crdYaml = Yaml.SaveToString(crd);
-                    var crdPath = Path.Combine(directory.FullName, $"{crd.Metadata.Name}.yaml");
+                    var crdYaml = crd.ToYaml();
+                    var crdPath = Path.Combine(directory.FullName, $"{crd.Name}.yaml");
 
                     console.WriteLine($"Writing CRD yaml to {crdPath}");
                     File.WriteAllText(crdPath, crdYaml);

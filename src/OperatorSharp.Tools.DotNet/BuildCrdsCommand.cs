@@ -21,6 +21,9 @@ namespace OperatorSharp.Tools.DotNet
         [Option("-o|--output")]
         public string OutputPath { get; set; }
 
+        [Option("-k|--kubernetes-version", CommandOptionType.SingleOrNoValue, Description = "The version of the Kubernetes CRD API to target. This must be either \"v1\" or \"v1beta1\".")]
+        public string Version { get; set; }
+
         private int OnExecute(IConsole console)
         {
             try
@@ -55,6 +58,11 @@ namespace OperatorSharp.Tools.DotNet
             if (!string.IsNullOrEmpty(OutputPath))
             {
                 psi.Arguments += $" /p:CrdOutputPath=\"{OutputPath}\"";
+            }
+
+            if (!string.IsNullOrEmpty(Version))
+            {
+                psi.Arguments += $" /p:CrdVersion=\"{Version}\"";
             }
 
             var process = Process.Start(psi);

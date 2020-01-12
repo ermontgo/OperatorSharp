@@ -1,4 +1,5 @@
 ﻿using k8s;
+using k8s.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OperatorSharp.Tools.DotNet;
 using OperatorSharp.UnitTests.Examples;
@@ -15,13 +16,17 @@ namespace OperatorSharp.UnitTests.CustomResourceDefinitions
         [TestMethod]
         public void CustomResourceDefinition_GeneratesSchema()
         {
-            var builder = new CustomResourceDefinitionBuilder();
+            var builder = new V1beta1CustomResourceDefinitionBuilder();
 
             var definition = builder.BuildDefinition(typeof(ExampleResource));
 
             var yamlCrd = Yaml.SaveToString(definition);
 
-            Assert.IsTrue(definition.Spec.Versions.First().Schema.OpenAPIV3Schema.Type != null);
+            if (definition.Crd is V1beta1CustomResourceDefinition crd)
+            {
+                Assert.IsTrue(crd.Spec.Versions.First().Schema.OpenAPIV3Schema.Type != null);
+            }
+            else Assert.Fail("The CRD returned was not of the correct type");
         }
     }
 }

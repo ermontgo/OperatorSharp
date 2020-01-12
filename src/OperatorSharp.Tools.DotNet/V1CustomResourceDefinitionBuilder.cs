@@ -10,9 +10,9 @@ using System.Text;
 
 namespace OperatorSharp.Tools.DotNet
 {
-    public class CustomResourceDefinitionBuilder
+    public class V1CustomResourceDefinitionBuilder : ICustomResourceDefinitionBuilder
     {
-        public V1CustomResourceDefinition BuildDefinition(Type resourceType)
+        public CustomResourceDefinitionContext BuildDefinition(Type resourceType)
         {
             if (!resourceType.Implements<CustomResource>()) throw new ArgumentException("Custom Resource Definitions can only be generated for custom resources", nameof(resourceType));
 
@@ -46,7 +46,7 @@ namespace OperatorSharp.Tools.DotNet
                     
                 };
 
-                return crd;
+                return new CustomResourceDefinitionContext<V1CustomResourceDefinition>(crd.Metadata.Name, crd);
             }
             catch (ArgumentException argEx)
             {
