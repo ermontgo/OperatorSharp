@@ -37,7 +37,6 @@ namespace OperatorSharp.Tools.DotNet
                         Group = apiVersion.Group,
                         Scope = scope.ToString(),
                         Names = new V1beta1CustomResourceDefinitionNames(kind, plural, shortNames: shortNames, singular: kind.ToLower()),
-                        PreserveUnknownFields = true,
                         Versions = new List<V1beta1CustomResourceDefinitionVersion>
                         {
                             BuildVersion(apiVersion, resourceType)
