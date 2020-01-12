@@ -21,7 +21,7 @@ namespace OperatorSharp.Tools.DotNet
         [Option("-o|--output")]
         public string OutputPath { get; set; }
 
-        [Option("-k|--kubernetes-version", CommandOptionType.SingleOrNoValue, Description = "The version of the Kubernetes CRD API to target. This must be either \"v1\" or \"v1beta1\".")]
+        [Option("-k|--kubernetes-version", CommandOptionType.SingleValue, Description = "The version of the Kubernetes CRD API to target. This must be either \"v1\" or \"v1beta1\".")]
         public string Version { get; set; }
 
         private int OnExecute(IConsole console)
