@@ -19,7 +19,7 @@ namespace OperatorSharp.Tools.DotNet
             try
             {
                 var apiVersion = GetAttribute<ApiVersionAttribute>(resourceType).ApiVersion;
-                var plural = GetAttribute<PluralNameAttribute>(resourceType).PluralName;
+                var plural = GetAttribute<PluralNameAttribute>(resourceType).PluralName.ToLower();
                 var scope = GetAttribute<ResourceScopeAttribute>(resourceType).ResourceScope;
                 var kind = GetAttribute<KindAttribute>(resourceType).Kind;
                 var shortNames = new List<string> { GetAttribute<ShortNameAttribute>(resourceType).ShortName };
