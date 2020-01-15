@@ -11,7 +11,7 @@ namespace OperatorSharp.Filters
     {
         private static Predicate<TCustomResource> IgnoreStatusUpdatesPredicate = message =>
         {
-            return message.Metadata.Generation != message.Status.ObservedGeneration;
+            return message.Metadata.Generation != message.Status?.ObservedGeneration;
         };
         
         public IgnoreStatusUpdatesOperatorFilter() : base(IgnoreStatusUpdatesPredicate)
