@@ -5,11 +5,14 @@
     <LangVersion>Latest</LangVersion>
     <Authors>Eric Montgomery</Authors>
     <RepositoryUrl>https://github.com/ermontgo/OperatorSharp</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <Description>OperatorSharp provides a framework for building Kubernetes controllers to manage custom resources and their definitions</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/ermontgo/OperatorSharp</PackageProjectUrl>
     <PackageTags>Kubernetes</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +20,7 @@
     <PackageReference Include="KubernetesClient" Version="1.6.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0" />
     <PackageReference Include="System.Reactive.Linq" Version="4.2.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
   <ItemGroup>
