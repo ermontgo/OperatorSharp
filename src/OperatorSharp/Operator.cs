@@ -60,7 +60,7 @@ namespace OperatorSharp
             try 
             {
                 Logger.LogDebug("Starting operator for {operator} operator", GetType().Name);
-                string plural = PluralName;
+                string plural = PluralName.ToLower();
 
                 Logger.LogDebug("Initiating watch for {resource}", plural);
                 var result = Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
