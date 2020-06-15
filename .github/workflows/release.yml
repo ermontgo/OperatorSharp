@@ -17,9 +17,9 @@ jobs:
       with:
         dotnet-version: 2.2.108
     - name: Build OperatorSharp with dotnet
-      run: dotnet build --configuration Release src/OperatorSharp.sln -p Version=1.0.0
+      run: dotnet build --configuration Release src/OperatorSharp.sln -p:Version=1.0.0
     - name: Package OperatorSharp
-      run: dotnet pack --configuration Release src/OperatorSharp.sln -p Version=1.0.0 -o ../artifacts/
+      run: dotnet pack --configuration Release src/OperatorSharp.sln -p:Version=1.0.0 -o ../artifacts/
     - name: Publish All
       run: |
            for f in src/artifacts/*.nupkg
