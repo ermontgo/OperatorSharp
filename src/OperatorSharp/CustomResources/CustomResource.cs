@@ -7,7 +7,7 @@ using OperatorSharp.CustomResources.Metadata;
 namespace OperatorSharp.CustomResources
 {
     // Adapted from https://github.com/engineerd/kubecontroller-csharp
-    public abstract class CustomResource : KubernetesObject 
+    public abstract class CustomResource : KubernetesObject
     {
         [JsonProperty(PropertyName = "metadata")]
         public V1ObjectMeta Metadata { get; set; }
@@ -23,7 +23,7 @@ namespace OperatorSharp.CustomResources
         }
     }
 
-    public abstract class CustomResource<TSpec> : CustomResource
+    public abstract class CustomResource<TSpec> : CustomResource, IMetadata<V1ObjectMeta>
     {
         [JsonProperty(PropertyName = "spec")]
         public TSpec Spec { get; set; }
