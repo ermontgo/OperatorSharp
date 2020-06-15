@@ -13,6 +13,7 @@
     <PackageProjectUrl>https://github.com/ermontgo/OperatorSharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ermontgo/OperatorSharp</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
+    <VersionPrefix>2.0.0</VersionPrefix>
   </PropertyGroup>
 
   <ItemGroup>

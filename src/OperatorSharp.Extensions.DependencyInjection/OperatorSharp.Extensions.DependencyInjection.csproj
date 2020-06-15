@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>Eric Montgomery</Authors>
+    <Company>Eric Montgomery</Company>
+    <Product>OperatorSharp</Product>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/ermontgo/OperatorSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ermontgo/OperatorSharp</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
