@@ -63,11 +63,20 @@ namespace OperatorSharp
                 string plural = PluralName.ToLower();
 
                 Logger.LogDebug("Initiating watch for {resource}", plural);
-                var result = Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
-                    ApiVersion.Group, ApiVersion.Version, watchedNamespace, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token
-                );
+                Task<Microsoft.Rest.HttpOperationResponse<object>> result = null;
+                if (GetAttribute<TCustomResource, ResourceScopeAttribute>().ResourceScope == ResourceScopes.Namespaced)
+                {
+                    Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
+                    result = Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
+                        ApiVersion.Group, ApiVersion.Version, watchedNamespace, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token
+                    );
+                }
+                else
+                {
+                    Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
+                    result = Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
+                }
 
-                Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
                 result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex));
 
                 return result;
