@@ -73,11 +73,11 @@ namespace OperatorSharp
                 }
                 else
                 {
-                    Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
+                    Logger.LogInformation("Watching {plural} resource in cluster", plural, watchedNamespace);
                     result = Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
                 }
 
-                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex));
+                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex), () => OnClosed());
 
                 return result;
             }
@@ -85,6 +85,11 @@ namespace OperatorSharp
                 HandleException(ex);
                 throw new OperatorStartupException("An error occurred while initializing the operator", ex);
             }
+        }
+
+        public virtual void OnClosed()
+        {
+            Logger.LogDebug("Operator {type} closed", this.GetType().ToString());
         }
 
         public static TAttribute GetAttribute<TResource, TAttribute>() where TAttribute: Attribute 
