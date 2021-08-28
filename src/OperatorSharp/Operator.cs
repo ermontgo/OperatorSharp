@@ -77,7 +77,10 @@ namespace OperatorSharp
                     result = Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
                 }
 
-                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex), () => OnClosed());
+                while (!token.IsCancellationRequested)
+                {
+                    result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex), () => OnClosed());
+                }
 
                 return result;
             }
