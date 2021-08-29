@@ -4,7 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5</TargetFramework>
     <AssemblyName>dotnet-operator-sharp</AssemblyName>
-    <PackageType>DotNetCliTool</PackageType>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>operatorsharp</ToolCommandName>
+    <
     <PackageId>OperatorSharp.Tools.DotNet</PackageId>
     <Authors>Eric Montgomery</Authors>
     <Company>Eric Montgomery</Company>
