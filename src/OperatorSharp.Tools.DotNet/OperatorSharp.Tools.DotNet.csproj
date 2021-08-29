@@ -6,7 +6,6 @@
     <AssemblyName>dotnet-operator-sharp</AssemblyName>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>operatorsharp</ToolCommandName>
-    <
     <PackageId>OperatorSharp.Tools.DotNet</PackageId>
     <Authors>Eric Montgomery</Authors>
     <Company>Eric Montgomery</Company>
