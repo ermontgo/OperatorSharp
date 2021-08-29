@@ -16,13 +16,13 @@ namespace OperatorSharp.UnitTests.CustomResourceDefinitions
         [TestMethod]
         public void CustomResourceDefinition_GeneratesSchema()
         {
-            var builder = new V1beta1CustomResourceDefinitionBuilder();
+            var builder = new V1CustomResourceDefinitionBuilder();
 
             var definition = builder.BuildDefinition(typeof(ExampleResource));
 
             var yamlCrd = Yaml.SaveToString(definition);
 
-            if (definition.Crd is V1beta1CustomResourceDefinition crd)
+            if (definition.Crd is V1CustomResourceDefinition crd)
             {
                 Assert.IsTrue(crd.Spec.Versions.First().Schema.OpenAPIV3Schema.Type != null);
             }

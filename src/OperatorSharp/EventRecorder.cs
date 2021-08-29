@@ -34,7 +34,7 @@ namespace OperatorSharp
             details.AddOccurrence(occurrence);
 
             Logger.LogDebug("Writing event to Kubernetes ({key}, Count: {count}", key.ToString(), details.Count);
-            V1Event ev = new V1Event(objRef,
+            Corev1Event ev = new Corev1Event(objRef,
                 new V1ObjectMeta() { Name = details.Name },
                 action: action,
                 message: message,

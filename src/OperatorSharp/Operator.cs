@@ -55,7 +55,7 @@ namespace OperatorSharp
         
         public abstract void HandleException(Exception ex);
 
-        public override Task WatchAsync(CancellationToken token, string watchedNamespace)
+        public override async Task WatchAsync(CancellationToken token, string watchedNamespace)
         {
             try 
             {
@@ -63,26 +63,22 @@ namespace OperatorSharp
                 string plural = PluralName.ToLower();
 
                 Logger.LogDebug("Initiating watch for {resource}", plural);
-                Task<Microsoft.Rest.HttpOperationResponse<object>> result = null;
+                Microsoft.Rest.HttpOperationResponse<object> result = null;
                 if (GetAttribute<TCustomResource, ResourceScopeAttribute>().ResourceScope == ResourceScopes.Namespaced)
                 {
                     Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
-                    result = Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
+                    result = await Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
                         ApiVersion.Group, ApiVersion.Version, watchedNamespace, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token
-                    );
+                    ).ConfigureAwait(false);
                 }
                 else
                 {
                     Logger.LogInformation("Watching {plural} resource in cluster", plural, watchedNamespace);
-                    result = Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
+                    result = await Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token).ConfigureAwait(false);
                 }
 
-                while (!token.IsCancellationRequested)
-                {
-                    result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex), () => OnClosed());
-                }
+                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex), () => OnClosed());
 
-                return result;
             }
             catch (Exception ex) {
                 HandleException(ex);
@@ -92,7 +88,7 @@ namespace OperatorSharp
 
         public virtual void OnClosed()
         {
-            Logger.LogDebug("Operator {type} closed", this.GetType().ToString());
+            Logger.LogWarning("Operator {type} closed", this.GetType().ToString());
         }
 
         public static TAttribute GetAttribute<TResource, TAttribute>() where TAttribute: Attribute 

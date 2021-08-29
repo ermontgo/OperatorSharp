@@ -23,9 +23,9 @@ namespace OperatorSharp.Tools.DotNet
 
         protected Dictionary<string, ICustomResourceDefinitionBuilder> builders = new Dictionary<string, ICustomResourceDefinitionBuilder>()
         {
-            { "v1beta1", new V1beta1CustomResourceDefinitionBuilder() },
+            // { "v1beta1", new V1beta1CustomResourceDefinitionBuilder() },
             { "v1", new V1CustomResourceDefinitionBuilder() },
-            { "", new V1beta1CustomResourceDefinitionBuilder() }
+            { "", new V1CustomResourceDefinitionBuilder() }
         };
 
         // Unsure how the CommandLineUtils API works and if it requires OnExecute to be private, so adding a public shim for unit testing

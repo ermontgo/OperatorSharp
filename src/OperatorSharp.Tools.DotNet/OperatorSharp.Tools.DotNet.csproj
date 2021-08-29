@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>net5</TargetFramework>
     <AssemblyName>dotnet-operator-sharp</AssemblyName>
     <PackageType>DotNetCliTool</PackageType>
     <PackageId>OperatorSharp.Tools.DotNet</PackageId>
@@ -15,6 +15,10 @@
     <RepositoryType>Git</RepositoryType>
     <VersionPrefix>2.0.0</VersionPrefix>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="V1beta1CustomResourceDefinitionBuilder.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="operatorsharp.g.targets" />
