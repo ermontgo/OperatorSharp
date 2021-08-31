@@ -29,6 +29,8 @@ namespace OperatorSharp
         protected IKubernetes Client { get; private set; }
         public ILogger<Operator<TCustomResource>> Logger { get; }
 
+        private TaskCompletionSource<bool> tcs;
+
         protected readonly List<IOperatorFilter<TCustomResource>> Filters = new List<IOperatorFilter<TCustomResource>>();
 
         public static ApiVersion ApiVersion => GetAttribute<TCustomResource, ApiVersionAttribute>().ApiVersion;
@@ -54,31 +56,46 @@ namespace OperatorSharp
         }
         
         public abstract void HandleException(Exception ex);
+        public void OnHandleException(Exception ex)
+        {
+            try
+            {
+                HandleException(ex);
+            }
+            catch (Exception thrownEx)
+            {
+                tcs.SetException(thrownEx);
+            }
+        }
 
-        public override async Task WatchAsync(CancellationToken token, string watchedNamespace)
+        public override Task WatchAsync(CancellationToken token, string watchedNamespace)
         {
             try 
             {
                 Logger.LogDebug("Starting operator for {operator} operator", GetType().Name);
                 string plural = PluralName.ToLower();
 
+                tcs = new TaskCompletionSource<bool>();
+
                 Logger.LogDebug("Initiating watch for {resource}", plural);
-                Microsoft.Rest.HttpOperationResponse<object> result = null;
+                Task<Microsoft.Rest.HttpOperationResponse<object>> result = null;
                 if (GetAttribute<TCustomResource, ResourceScopeAttribute>().ResourceScope == ResourceScopes.Namespaced)
                 {
                     Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
-                    result = await Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
+                    result = Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
                         ApiVersion.Group, ApiVersion.Version, watchedNamespace, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token
-                    ).ConfigureAwait(false);
+                    );
                 }
                 else
                 {
                     Logger.LogInformation("Watching {plural} resource in cluster", plural, watchedNamespace);
-                    result = await Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token).ConfigureAwait(false);
+                    result = Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
                 }
+                result.ConfigureAwait(false);
 
-                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => HandleException(ex), () => OnClosed());
+                result.Watch<TCustomResource, object>((type, item) => OnHandleItem(type, item), (ex) => OnHandleException(ex), () => OnClosed());
 
+                return Task.WhenAll(result, tcs.Task);
             }
             catch (Exception ex) {
                 HandleException(ex);
@@ -88,6 +105,7 @@ namespace OperatorSharp
 
         public virtual void OnClosed()
         {
+            tcs.SetResult(true);
             Logger.LogWarning("Operator {type} closed", this.GetType().ToString());
         }
 
