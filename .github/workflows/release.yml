@@ -19,7 +19,7 @@ jobs:
     - name: Build OperatorSharp with dotnet
       run: dotnet build --configuration Release src/OperatorSharp.sln
     - name: Package OperatorSharp
-      run: dotnet pack --configuration Release src/OperatorSharp.sln -o ../artifacts/
+      run: dotnet pack --configuration Release src/OperatorSharp.sln -o ../../artifacts/
     - name: Publish All
       run: |
            for f in artifacts/*.nupkg
