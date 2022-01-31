@@ -53,7 +53,7 @@ namespace OperatorSharp.Extensions.DependencyInjection
             }
             catch (Exception ex)
             {
-                logger.LogError("An error occurred during operator execution", ex);
+                logger.LogError(ex, "An error occurred during operator execution");
             }
         }
 
