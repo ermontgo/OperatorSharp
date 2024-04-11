@@ -1,6 +1,7 @@
 ﻿using k8s;
 using k8s.Models;
 using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Schema.Generation;
 using OperatorSharp.CustomResources;
 using OperatorSharp.CustomResources.Metadata;
 using System;
@@ -56,9 +57,13 @@ namespace OperatorSharp.Tools.DotNet
 
         public V1CustomResourceDefinitionVersion BuildVersion(ApiVersion apiVersion, Type type)
         {
-            JsonSchemaGenerator schemaGenerator = new JsonSchemaGenerator();
+            JSchemaGenerator schemaGenerator = new();
             var schema = schemaGenerator.Generate(type);
-            schema.Properties = new Dictionary<string, JsonSchema>(schema.Properties.Where(kvp => kvp.Key == "spec" || kvp.Key == "status"));
+            var unneededPropertyNames = schema.Properties.Where(kvp => kvp.Key != "spec" && kvp.Key != "status").Select(kvp => kvp.Key).ToList();
+            foreach (var property in unneededPropertyNames)
+            {
+                schema.Properties.Remove(property);
+            }
             
             var version = new V1CustomResourceDefinitionVersion(apiVersion.Version, true, true);
             version.Schema = new V1CustomResourceValidation();
@@ -72,10 +77,10 @@ namespace OperatorSharp.Tools.DotNet
             return version;
         }
 
-        private V1JSONSchemaProps MapSchemaToKubernetesModels(JsonSchema schema)
+        private V1JSONSchemaProps MapSchemaToKubernetesModels(JSchema schema)
         {
             var result = new V1JSONSchemaProps();
-            result.Type = (schema.Type & ~JsonSchemaType.Null).ToString().ToLower();
+            result.Type = (schema.Type.Value & ~JSchemaType.Null).ToString().ToLower();
             result.Pattern = schema.Pattern;
 
             if (schema.Properties != null)

@@ -57,10 +57,11 @@ namespace OperatorSharp.Extensions.DependencyInjection
             }
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
             // Stop TCS
             cts.Cancel();
+            return Task.CompletedTask;
         }
 
         protected virtual void Dispose(bool disposing)

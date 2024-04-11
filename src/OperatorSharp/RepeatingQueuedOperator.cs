@@ -33,12 +33,13 @@ namespace OperatorSharp
             tags = new MetricTags("operator-kind", PluralName);
         }
 
-        public override async Task HandleItem(WatchEventType eventType, TCustomResource item)
+        public override Task HandleItem(WatchEventType eventType, TCustomResource item)
         {
             var executionContext = new CustomResourceExecutionContext<TCustomResource>() { Item = item, EventType = eventType, PreviousExecutionsCount = 0 };
             executionQueue.Enqueue(executionContext);
             Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, tags, executionQueue.Count);
             Metrics?.Measure.Counter.Increment(RepeatingQueuedOperatorMetrics.MessagesProcessed, tags);
+            return Task.CompletedTask;
         }
 
         protected IMetrics Metrics { get; set; }
