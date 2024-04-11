@@ -1,13 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text.Json.Serialization;
 
 namespace OperatorSharp.CustomResources
 {
     public class CustomResourceStatus
     {
-        [JsonProperty("observedGeneration")]
+        [JsonPropertyName("observedGeneration")]
         public long? ObservedGeneration { get; set; }
     }
 }

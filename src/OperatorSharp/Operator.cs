@@ -8,6 +8,7 @@ using OperatorSharp.CustomResources.Metadata;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using OperatorSharp.Filters;
+using k8s.Autorest;
 
 namespace OperatorSharp
 {
@@ -78,18 +79,18 @@ namespace OperatorSharp
                 tcs = new TaskCompletionSource<bool>();
 
                 Logger.LogDebug("Initiating watch for {resource}", plural);
-                Task<Microsoft.Rest.HttpOperationResponse<object>> result = null;
+                Task<HttpOperationResponse<object>> result = null;
                 if (GetAttribute<TCustomResource, ResourceScopeAttribute>().ResourceScope == ResourceScopes.Namespaced)
                 {
                     Logger.LogInformation("Watching {plural} resource in {namespace} namespace", plural, watchedNamespace);
-                    result = Client.ListNamespacedCustomObjectWithHttpMessagesAsync(
+                    result = Client.CustomObjects.ListNamespacedCustomObjectWithHttpMessagesAsync(
                         ApiVersion.Group, ApiVersion.Version, watchedNamespace, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token
                     );
                 }
                 else
                 {
                     Logger.LogInformation("Watching {plural} resource in cluster", plural, watchedNamespace);
-                    result = Client.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
+                    result = Client.CustomObjects.ListClusterCustomObjectWithHttpMessagesAsync(ApiVersion.Group, ApiVersion.Version, plural, watch: true, timeoutSeconds: 30000, cancellationToken: token);
                 }
                 result.ConfigureAwait(false);
 
