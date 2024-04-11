@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OperatorSharp
 {
@@ -32,7 +33,7 @@ namespace OperatorSharp
             tags = new MetricTags("operator-kind", PluralName);
         }
 
-        public override void HandleItem(WatchEventType eventType, TCustomResource item)
+        public override async Task HandleItem(WatchEventType eventType, TCustomResource item)
         {
             var executionContext = new CustomResourceExecutionContext<TCustomResource>() { Item = item, EventType = eventType, PreviousExecutionsCount = 0 };
             executionQueue.Enqueue(executionContext);
@@ -42,7 +43,7 @@ namespace OperatorSharp
 
         protected IMetrics Metrics { get; set; }
 
-        protected void HandleTimer(object state)
+        protected async void HandleTimer(object state)
         {
             var now = DateTimeOffset.Now;
             var newEvents = retryItems.Where(k => k.Value.NextExecutionTime <= now).Select(k => k.Value).ToList();
@@ -63,8 +64,8 @@ namespace OperatorSharp
 
                 try
                 {
-                    Logger.LogDebug("Dequeueing {kind} {name} for execution ({n}th execution since {enqueueDate})", context.Item.Kind, context.Item.Metadata.Name, context.PreviousExecutionsCount, context.EnqueuedDate);
-                    var result = HandleDequeuedItem(context.EventType, context.Item, context.PreviousExecutionsCount);
+                    Logger.LogDebug("Dequeuing {kind} {name} for execution ({n}th execution since {enqueueDate})", context.Item.Kind, context.Item.Metadata.Name, context.PreviousExecutionsCount, context.EnqueuedDate);
+                    var result = await HandleDequeuedItem(context.EventType, context.Item, context.PreviousExecutionsCount);
                     if (!result)
                     {
                         Logger.LogDebug("Execution of {kind} {name} failed", context.Item.Kind, context.Item.Metadata.Name);
@@ -96,7 +97,7 @@ namespace OperatorSharp
             }
         }
 
-        public abstract bool HandleDequeuedItem(WatchEventType type, TCustomResource item, int executionCount);
+        public abstract Task<bool> HandleDequeuedItem(WatchEventType type, TCustomResource item, int executionCount);
 
         public void Dispose()
         {

@@ -37,9 +37,9 @@ namespace OperatorSharp
         public static ApiVersion ApiVersion => GetAttribute<TCustomResource, ApiVersionAttribute>().ApiVersion;
         public static string PluralName => GetAttribute<TCustomResource, PluralNameAttribute>().PluralName;
 
-        public abstract void HandleItem(WatchEventType eventType, TCustomResource item);
+        public abstract Task HandleItem(WatchEventType eventType, TCustomResource item);
 
-        public void OnHandleItem(WatchEventType eventType, TCustomResource item)
+        public async void OnHandleItem(WatchEventType eventType, TCustomResource item)
         {
             bool continuePipeline = true;
             foreach (var filter in Filters)
@@ -53,15 +53,15 @@ namespace OperatorSharp
                 }
             }
 
-            if (continuePipeline) HandleItem(eventType, item);
+            if (continuePipeline) await HandleItem(eventType, item);
         }
         
-        public abstract void HandleException(Exception ex);
-        public void OnHandleException(Exception ex)
+        public abstract Task HandleException(Exception ex);
+        public async void OnHandleException(Exception ex)
         {
             try
             {
-                HandleException(ex);
+                await HandleException(ex);
             }
             catch (Exception thrownEx)
             {
