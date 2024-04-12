@@ -43,7 +43,7 @@ namespace OperatorSharp
                 lastTimestamp: details.LastSeen,
                 count: details.Count);
 
-            Kubernetes.ReplaceNamespacedEventAsync(ev, details.Name, objRef.NamespaceProperty);
+            Kubernetes.CoreV1.ReplaceNamespacedEventAsync(ev, details.Name, objRef.NamespaceProperty);
         }
 
         private class EventKey : IEquatable<EventKey>

@@ -24,7 +24,7 @@ namespace OperatorSharp.Tools.DotNet
 
         public override string ToYaml()
         {
-            return Yaml.SaveToString(Crd as TResult);
+            return KubernetesJson.Serialize(Crd as TResult);
         }
     }
 }
