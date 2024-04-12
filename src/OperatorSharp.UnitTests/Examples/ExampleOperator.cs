@@ -4,6 +4,7 @@ using OperatorSharp.Filters;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OperatorSharp.UnitTests.Examples
 {
@@ -15,12 +16,12 @@ namespace OperatorSharp.UnitTests.Examples
 
         public int HandledItems { get; set; }
 
-        public override void HandleException(Exception ex)
+        public override async Task HandleException(Exception ex)
         {
             throw new NotImplementedException();
         }
 
-        public override void HandleItem(WatchEventType eventType, ExampleResource item)
+        public override async Task HandleItem(WatchEventType eventType, ExampleResource item)
         {
             HandledItems++;
         }

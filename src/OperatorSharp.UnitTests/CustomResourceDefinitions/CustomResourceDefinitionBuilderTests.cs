@@ -20,7 +20,7 @@ namespace OperatorSharp.UnitTests.CustomResourceDefinitions
 
             var definition = builder.BuildDefinition(typeof(ExampleResource));
 
-            var yamlCrd = Yaml.SaveToString(definition);
+            var yamlCrd = KubernetesJson.Serialize(definition);
 
             if (definition.Crd is V1CustomResourceDefinition crd)
             {

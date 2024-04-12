@@ -1,14 +1,11 @@
-﻿using App.Metrics;
-using App.Metrics.Counter;
-using App.Metrics.Gauge;
-using k8s;
+﻿using k8s;
 using Microsoft.Extensions.Logging;
 using OperatorSharp.CustomResources;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,26 +20,27 @@ namespace OperatorSharp
         private Timer timer;
         private readonly int? executionLimit;
 
-        private MetricTags tags;
+        private TagList tags;
 
         public RepeatingQueuedOperator(IKubernetes client, ILogger<Operator<TCustomResource>> logger, int delayMilliseconds, int periodMilliseconds, int? executionLimit = null) : base(client, logger)
         {
             timer = new Timer(HandleTimer, null, delayMilliseconds, periodMilliseconds);
             this.executionLimit = executionLimit;
 
-            tags = new MetricTags("operator-kind", PluralName);
+            tags = new TagList
+            {
+                { "operator-kind", PluralName }
+            };
         }
 
         public override Task HandleItem(WatchEventType eventType, TCustomResource item)
         {
             var executionContext = new CustomResourceExecutionContext<TCustomResource>() { Item = item, EventType = eventType, PreviousExecutionsCount = 0 };
             executionQueue.Enqueue(executionContext);
-            Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, tags, executionQueue.Count);
-            Metrics?.Measure.Counter.Increment(RepeatingQueuedOperatorMetrics.MessagesProcessed, tags);
+            RepeatingQueuedOperatorMetrics.ExecutionQueueDepth.Add(1, tags);
+            RepeatingQueuedOperatorMetrics.MessagesProcessed.Add(1, tags);
             return Task.CompletedTask;
         }
-
-        protected IMetrics Metrics { get; set; }
 
         protected async void HandleTimer(object state)
         {
@@ -52,16 +50,16 @@ namespace OperatorSharp
             {
                 if (retryItems.TryRemove(ev, out _))
                 {
-                    Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, tags, retryItems.Count);
+                    RepeatingQueuedOperatorMetrics.RetryItemDepth.Add(-1, tags);
                     Logger.LogDebug("Queueing {kind} {item} from retry list", ev.Item.Kind, ev.Item.Metadata.Name);
                     executionQueue.Enqueue(ev);
-                    Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, tags, executionQueue.Count);
+                    RepeatingQueuedOperatorMetrics.ExecutionQueueDepth.Add(1, tags);
                 }
             }
 
             if (executionQueue.TryDequeue(out var context))
             {
-                Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.ExecutionQueueDepth, tags, executionQueue.Count);
+                RepeatingQueuedOperatorMetrics.ExecutionQueueDepth.Add(-1, tags);
 
                 try
                 {
@@ -94,7 +92,7 @@ namespace OperatorSharp
 
                 Logger.LogDebug("Requeuing {kind} {name} to execute after {time} ({backoffSeconds})", context.Item.Kind, context.Item.Metadata.Name, context.NextExecutionTime, backoffSeconds);
                 retryItems.TryAdd(context, context);
-                Metrics?.Measure.Gauge.SetValue(RepeatingQueuedOperatorMetrics.RetryItemDepth, tags, retryItems.Count);
+                RepeatingQueuedOperatorMetrics.RetryItemDepth.Add(1, tags);
             }
         }
 
@@ -118,9 +116,11 @@ namespace OperatorSharp
 
     public static class RepeatingQueuedOperatorMetrics
     {
-        public static GaugeOptions ExecutionQueueDepth = new GaugeOptions() { Name = "Execution Queue Depth", MeasurementUnit = Unit.Items };
-        public static GaugeOptions RetryItemDepth = new GaugeOptions() { Name = "Retry Items Depth", MeasurementUnit = Unit.Items };
-        public static CounterOptions MessagesProcessed = new CounterOptions() { Name = "Messages Processed", MeasurementUnit = Unit.Items };
-        public static CounterOptions MessagesEvicted = new CounterOptions() { Name = "Messages Evicted", MeasurementUnit = Unit.Items };
+        private static Meter meter = new Meter("OperatorSharp.RepeatingQueuedOperator");
+
+        public static UpDownCounter<int> ExecutionQueueDepth = meter.CreateUpDownCounter<int>("execution.depth", "messages", "The number of items in the execution queue");
+        public static UpDownCounter<int> RetryItemDepth = meter.CreateUpDownCounter<int>("retry.depth", "messages", "The number of items in the retry queue");
+        public static Counter<int> MessagesProcessed = meter.CreateCounter<int>("messages.processed", "messages", "The number of messages processed");
+        public static Counter<int> MessagesEvicted = meter.CreateCounter<int>("messages.evicted", "messages", "Number of messages evicted");
     }
 }
